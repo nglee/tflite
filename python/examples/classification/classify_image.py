@@ -33,7 +33,9 @@ import time
 from PIL import Image
 
 import classify
-import tflite_runtime.interpreter as tflite
+#import tflite_runtime.interpreter as tflite
+import tensorflow.lite as tflite
+import numpy as np
 import platform
 
 EDGETPU_SHARED_LIB = {
@@ -69,7 +71,7 @@ def make_interpreter(model_file):
   return tflite.Interpreter(
       model_path=model_file,
       experimental_delegates=[
-          tflite.load_delegate(EDGETPU_SHARED_LIB,
+          tflite.experimental.load_delegate(EDGETPU_SHARED_LIB,
                                {'device': device[0]} if device else {})
       ])
 
@@ -101,7 +103,11 @@ def main():
 
   size = classify.input_size(interpreter)
   image = Image.open(args.input).convert('RGB').resize(size, Image.ANTIALIAS)
-  classify.set_input(interpreter, image)
+
+  NHWC = np.array(image)
+  NCHW = NHWC.reshape((3, image.height, image.width))
+
+  classify.set_input(interpreter, NCHW)
 
   print('----INFERENCE TIME----')
   print('Note: The first inference on Edge TPU is slow because it includes',

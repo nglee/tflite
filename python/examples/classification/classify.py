@@ -23,7 +23,7 @@ Class = collections.namedtuple('Class', ['id', 'score'])
 
 def input_size(interpreter):
   """Returns input image size as (width, height) tuple."""
-  _, height, width, _ = interpreter.get_input_details()[0]['shape']
+  _, _, height, width = interpreter.get_input_details()[0]['shape']
   return width, height
 
 
